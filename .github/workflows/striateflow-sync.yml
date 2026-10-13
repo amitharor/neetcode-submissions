@@ -1,0 +1,31 @@
+name: StriateFlow sync
+
+# Tells StriateFlow about every new NeetCode submission the moment it lands,
+# so it is queued to log even when the app is closed.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Data Structures & Algorithms/**'
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Send push event to StriateFlow
+        env:
+          WEBHOOK_URL: https://www.striateflow.com/api/webhook/github
+          # Optional: set this repo secret to the same value as StriateFlow's GITHUB_WEBHOOK_SECRET
+          WEBHOOK_SECRET: ${{ secrets.STRIATEFLOW_WEBHOOK_SECRET }}
+        run: |
+          headers=(-H "Content-Type: application/json" -H "X-GitHub-Event: push")
+          if [ -n "$WEBHOOK_SECRET" ]; then
+            signature="sha256=$(openssl dgst -sha256 -hmac "$WEBHOOK_SECRET" "$GITHUB_EVENT_PATH" | awk '{print $2}')"
+            headers+=(-H "X-Hub-Signature-256: $signature")
+          fi
+          curl --fail-with-body --silent --show-error --retry 3 --retry-delay 5 \
+            "${headers[@]}" --data-binary "@$GITHUB_EVENT_PATH" "$WEBHOOK_URL"
