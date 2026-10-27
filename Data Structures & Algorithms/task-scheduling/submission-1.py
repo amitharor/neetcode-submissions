@@ -1,0 +1,41 @@
+'''
+Input(s): arr [str],  n (int)
+Output: min num of CPU cycles to cool down the CPU
+
+Constraints:
+1 <= tasks.length <= 10000
+0 <= n <= 100
+
+Approach:
+
+
+Time: O(m) - total number of tasks
+Space: O(1) - since we have 26 characters
+'''
+
+
+from collections import Counter
+
+class Solution:
+    def leastInterval(self, tasks: List[str], n: int) -> int:
+        count = Counter(tasks)
+        maxHeap = [-cnt for cnt in count.values()]
+        heapq.heapify(maxHeap)
+
+        time = 0
+        queue = deque() # pairs of [-cnt, idleTime]
+
+        while maxHeap or queue:
+            time += 1
+
+            if not maxHeap:
+                time = queue[0][1]
+            else:
+                cnt = 1 + heapq.heappop(maxHeap)
+                if cnt:
+                    queue.append([cnt, time + n])
+            
+            if queue and queue[0][1] == time:
+                heapq.heappush(maxHeap, queue.popleft()[0])
+
+        return time
