@@ -24,4 +24,4 @@ jobs:
         run: |
           jq -n --arg repo "$REPO" --arg token "$RUN_KEY" '{repo: $repo, token: $token}' |
             curl --silent --show-error --fail-with-body --retry 3 --retry-all-errors --max-time 120 \
-              -H 'content-type: application/json' --data @- https://striateflow.com/api/repo-sync
+              -H 'content-type: application/json' --data @- https://www.striateflow.com/api/repo-sync
